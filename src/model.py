@@ -1,8 +1,13 @@
 import numpy as np
 import pandas as pd
 import typing
+import umap
 from matplotlib import pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA_dim
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.manifold import TSNE
 from sklearn.metrics import mean_absolute_error, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -11,18 +16,17 @@ from sklearn.svm import SVR, SVC
 from xgboost import XGBRegressor, XGBClassifier
 
 from src.nn import train_nn
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA_dim
-from sklearn.manifold import TSNE
-import umap
 
-
-
-def cluster(data):
+from sklearn_extra.cluster import KMedoids
+def cluster(data, cluster_option: str = "kmedoids"):
     scaler = StandardScaler()
     data = scaler.fit_transform(data)
-    clusterizer = KMeans()
+    if cluster_option == "kmeans":
+        clusterizer = KMeans()
+    elif cluster_option == "kmedoids":
+        clusterizer = KMediods()
+    else:
+        raise Exception("Wrong cluster_option given!")
     clusterizer.fit(data)
     labels = clusterizer.labels_
     for n_components in [2, 3]:
@@ -37,11 +41,21 @@ def cluster(data):
                 dim_reducer = umap.UMAP(n_components=n_components)
             else:
                 raise Exception("wrong dimensionality reduction option given!")
-            reduced_data = dim_reducer.fit_transform(data)
-            print(reduced_data.shape)
-            for (x,y) in reduced_data:
-                plt.scatter(x,y)
-            plt.title(f"{dim_red_option} for {n_components} plot")
+            scaled_data = StandardScaler().fit_transform(data)
+            reduced_data = dim_reducer.fit_transform(scaled_data)
+            colors = {0: "b", 1: "r", 2: "g", 3: "c", 4: "m", 5: "y", 6: "k"}
+            if n_components == 2:
+                for (x, label) in list(zip(reduced_data, labels)):
+                    plt.scatter(x[0], x[1], color=colors[label])
+                plt.gca().set_aspect('equal', 'datalim')
+            elif n_components == 3:
+                fig = plt.figure()
+                ax = fig.add_subplot(projection='3d')
+                for (x, label) in list(zip(reduced_data, labels)):
+                    ax.scatter(x[0], x[1], x[2], color=colors[label])
+            else:
+                raise Exception(f"n_components has to be 2 or 3 while {n_components} was given!")
+            plt.title(f'{dim_red_option} learned embeddings projection of the protein agg. dataset in {n_components}D', fontsize=24)
             plt.show()
 
 
@@ -52,6 +66,7 @@ def train(data: np.ndarray,
     data_scaler = StandardScaler()
     label_scaler = StandardScaler()
 
+    # TODO subject to change in the future
     intervals = {(min(labels), 3.999): 0,
                  (4, 4.9999): 1,
                  (5, 7.4999): 2,
