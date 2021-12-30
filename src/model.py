@@ -13,6 +13,11 @@ from xgboost import XGBRegressor, XGBClassifier
 from src.nn import train_nn
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA_dim
+from sklearn.manifold import TSNE
+import umap
+
+
 
 def cluster(data):
     scaler = StandardScaler()
@@ -20,13 +25,24 @@ def cluster(data):
     clusterizer = KMeans()
     clusterizer.fit(data)
     labels = clusterizer.labels_
-    dim_reducer = PCA( n_components=2)
-    red_data = dim_reducer.fit_transform(data)
-
-    print(red_data.shape)
-    for (x,y) in red_data:
-        plt.scatter(x,y)
-    plt.show()
+    for n_components in [2, 3]:
+        for dim_red_option in ["PCA", "TSNE", "LDA", "UMAP"]:
+            if dim_red_option == "PCA":
+                dim_reducer = PCA(n_components=n_components)
+            elif dim_red_option == "TSNE":
+                dim_reducer = TSNE(n_components=n_components)
+            elif dim_red_option == "LDA":
+                dim_reducer = LDA_dim(n_components=n_components)
+            elif dim_red_option == "UMAP":
+                dim_reducer = umap.UMAP(n_components=n_components)
+            else:
+                raise Exception("wrong dimensionality reduction option given!")
+            reduced_data = dim_reducer.fit_transform(data)
+            print(reduced_data.shape)
+            for (x,y) in reduced_data:
+                plt.scatter(x,y)
+            plt.title(f"{dim_red_option} for {n_components} plot")
+            plt.show()
 
 
 def train(data: np.ndarray,
