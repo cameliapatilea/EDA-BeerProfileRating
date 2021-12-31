@@ -18,13 +18,13 @@ from xgboost import XGBRegressor, XGBClassifier
 from src.nn import train_nn
 
 from sklearn_extra.cluster import KMedoids
-def cluster(data, cluster_option: str = "kmedoids"):
+def cluster(data, cluster_option: str = "kmeans"):
     scaler = StandardScaler()
     data = scaler.fit_transform(data)
     if cluster_option == "kmeans":
-        clusterizer = KMeans()
+        clusterizer = KMeans(n_clusters=5)
     elif cluster_option == "kmedoids":
-        clusterizer = KMediods()
+        clusterizer = KMedoids()
     else:
         raise Exception("Wrong cluster_option given!")
     clusterizer.fit(data)
@@ -127,18 +127,51 @@ def main():
     data_columns = ['Min IBU', 'Max IBU', 'Astringency', 'Body', 'Alcohol', 'Bitter', 'Sweet', 'Sour', 'Salty',
                     'Fruits', 'Hoppy', 'Spices', 'Malty']
     data = df[data_columns].to_numpy()
-    targets = np.array(df['ABV'].to_list())  # BREW ALCOHOL CONTENT
-    print(df['ABV'].describe())
+    abv_target = "ABV"
+    review_target = "review_overall"
+    predicted_target = abv_target
+
+    targets = np.array(df[predicted_target].to_list())  # BREW ALCOHOL CONTENT
+    print(df[predicted_target].describe())
 
     # plt.hist(targets, bins=25)
     # plt.show()
-    data = df[['Bitter', 'Sweet', 'Sour', 'Salty']].to_numpy()
+    taste_cols = ['Bitter', 'Sweet', 'Sour', 'Salty']
+    mouthfeel_cols = ['Astringency', 'Body', 'Alcohol']
+    flavor_aroma_cols = ['Fruits', 'Hoppy', 'Spices', 'Malty']
+
+    data = df[taste_cols].to_numpy()
+
     cluster(data)
     # model_types = ['SVM', 'RF', 'XGB', 'NN']
     # task_types = ['regression', 'classification']
     # for model_type in model_types:
     #     for task_type in task_types:
     #         train(data, targets, model_type=model_type, task_type=task_type)
+
+
+
+    # TODO-urile de mai jos sunt mai mult idei, nu trebuie sa le facem pe toate, dar sa facem cat mai multe ideal
+
+    # TODO de vazut daca e nevoie de any data preprocessing cleaning mai speciala
+
+    # TODO de facut analiza exploratorie in R
+
+    # TODO finetuning pentru cel mai bun model de clasificare / regresie (pentru modelele facute cu keras se poate folosi keras tuner
+
+    # TODO feature selection cu forward/backward si alti alogritmi din sklearn pentru feature selection
+
+    # TODO testat scaling cu min max si standard scaler
+
+    # TODO antrenarea unui autoencoder simplu cu keras pentru reducerea dimensionalitatii la bottleneck de 2 sau ->
+    # bottleneck de 3 pentru a vedea cum arata vizualizarea la clustere cu spatiul latent al autoencoder-ului, apoi de ->
+    # folosit autoencoderul strict ca feature extractor pentru a servi apoi datele unui alt model gen SVM, NB, RF |
+
+    # TODO facut partea de explainability cu un shap/lime unde se poate
+
+    # TODO de generat date pentru un system de recomandare care sa recomande pe cele 2 paradigme de recommendation (user based si content based)
+    # pe content based putem sa si recomandam berile care au o valori apropiate la feature-uri sau care produc cosine distance bun la embedding-urile
+    # obtinute la mijlocul autoencoder-ului
 
 
 if __name__ == '__main__':
