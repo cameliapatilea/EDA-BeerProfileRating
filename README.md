@@ -31,6 +31,6 @@ python src/main.py
 
 If you will encounter any errors related to importing stuff from other Python files from the "src" folder we recommend the following line of code:
 
-export PYTHONPATH=`pwd`
+export PYTHONPATH=\`pwd\`
 
 Should fix any path problems.
