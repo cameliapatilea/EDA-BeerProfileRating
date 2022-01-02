@@ -9,6 +9,8 @@ Create at lest 4 models ( that must be further trained) to predict something con
 
 Write documentation and explain the whole process. 
 
+CLOC - 700 lines of code in 7 files
+
 # Running code
 
 In order to rune the code from this repo you should firstly create an anaconda environment with a version of Python 3.10:
