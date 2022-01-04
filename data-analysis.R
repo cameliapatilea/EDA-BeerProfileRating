@@ -31,8 +31,8 @@ wordcloud(words = df_wordcloud_name$word,
           rot.per = 0.35,
           colors = brewer.pal(8, "Dark2"))
 
-wordcloud2(data=df_wordcloud_name, size=1.6, color='random-dark')
+#wordcloud2(data=df_wordcloud_name, size=1.6, color='random-dark')
 
 # de facut in phostoshop
-beer_1_path = system.file(paste0(path, "/media/beer-1.png"), package = "wordcloud2")
-wordcloud2(df_wordcloud_name, figPath = paste0(path, "media/beer-1.png"), size = 1,color = "skyblue")
+#beer_1_path = system.file(paste0(path, "/media/beer-1.png"), package = "wordcloud2")
+#wordcloud2(df_wordcloud_name, figPath = paste0(path, "media/beer-1.png"), size = 1,color = "skyblue")
