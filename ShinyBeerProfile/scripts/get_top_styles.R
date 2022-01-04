@@ -10,7 +10,7 @@ get_top_styles <- function() {
   
   style_counter <- df %>% count(Style)
   
-  style_counter <- head(arrange(style_counter, desc(n)), n = 30)
+  style_counter <- head(arrange(style_counter, desc(n)), n = 20)
   
   style_counter
 }

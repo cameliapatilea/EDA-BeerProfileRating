@@ -17,6 +17,9 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
     tabItems(
         tabItem(tabName = "beers-in-numbers",
+                fluidPage(
+               
+        
                 h2("Beers In Numbers"),
                 br(),
                 br(),
@@ -38,9 +41,20 @@ body <- dashboardBody(
                         ),
                         width = 4
                     )
+                ),
+                br(),
+                br(),
+                fluidRow(
+                    column(
+                        width = 12,
+                        showOutput("plotReviews", "highcharts"),
+                       
+                        
+                    )
                 )
                 
-        ),
+                
+        )),
         
         tabItem(tabName = "word-my-beer",
                 h1("Word My Beer!!!"),
@@ -54,7 +68,7 @@ body <- dashboardBody(
                 plotOutput("top_breweries", height = "600px", width = "100%"),
                 br(),
                 br(),
-                h2("3. Top 30 Styles", style = "color: crimson"),
+                h2("3. Top 20 Styles", style = "color: crimson"),
                 plotOutput("top_styles", height = "600px", width = "100%"),
                 br(),
         ),
@@ -63,6 +77,7 @@ body <- dashboardBody(
                 h2("Find Your Poison")
         )
     )
+    
 )
 
 shinyUI(dashboardPage(
