@@ -10,7 +10,9 @@ source(paste0(path, "ShinyBeerProfile/scripts/get_top_breweries.R"))
 source(paste0(path, "ShinyBeerProfile/scripts/get_top_styles.R"))
 source(paste0(path, "ShinyBeerProfile/scripts/get_beer_statistics.R"))
 source(paste0(path,'ShinyBeerProfile/scripts/get_buckets_for_reviews.R'))
+source(paste0(path,'ShinyBeerProfile/scripts/get_buckets_for_abv.R'))
 source(paste0(path,'ShinyBeerProfile/scripts/plot_reviews.R'))
+source(paste0(path,'ShinyBeerProfile/scripts/plot_abv.R'))
 
 pkg <- c("log4r", "bizdays", "data.table", "dplyr", "lubridate", "RPostgres", "xlsx", "rCharts", "shiny", "shinydashboard", "reshape2", "reshape", "optiRum", "plotly")
 lapply(pkg, require, character.only = TRUE)
@@ -110,6 +112,13 @@ shinyServer(function(input, output) {
     output$plotReviews<- renderChart2({
         data <- get_buckets_for_reviews()
         plot <- plotReviews(data = data)
+        plot$channelPlot
+    })
+    
+    
+    output$plotABV<- renderChart2({
+        data <- get_buckets_for_abv()
+        plot <- plot_abv(data = data)
         plot$channelPlot
     })
 

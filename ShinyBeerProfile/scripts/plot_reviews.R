@@ -55,7 +55,7 @@ plotReviews <- function(data = c()){
   
   channelPlot$chart(zoomType = "xy")
   
-  channelPlot$set(width = 1800, height = 600)
+  channelPlot$set(width = 1500, height = 600)
   
   channelPlot$tooltip(shared = TRUE)
   
