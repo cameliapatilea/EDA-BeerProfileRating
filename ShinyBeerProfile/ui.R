@@ -10,7 +10,7 @@ sidebar <- dashboardSidebar(
     sidebarMenu(
         menuItem("Beers In Numbers", tabName = "beers-in-numbers", icon = icon("cash-register")),
         menuItem("Word My Beer", tabName = "word-my-beer", icon = icon("beer")),
-        menuItem("Find Your Poison", tabName = "find-your-posion", icon = icon("flask"), badgeLabel = "new", badgeColor = "red")
+        menuItem("Find Your Poison", tabName = "find-your-poison", icon = icon("flask"), badgeLabel = "new", badgeColor = "red")
     )
 )
 

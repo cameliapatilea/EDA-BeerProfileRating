@@ -88,10 +88,10 @@ shinyServer(function(input, output) {
     output$top_styles <- renderPlot({
         
         styles_counter <- get_top_styles()
-        
-        ggplot() +
+
+        g <- ggplot() +
             geom_bar(data = styles_counter,
-                     aes(x = reorder(Style, -n), y = n),
+                     aes(x = reorder(Style, n), y = n),
                      stat = "identity",
                      alpha = 0.8,
                      fill = "#6ba4fa") +
@@ -106,6 +106,7 @@ shinyServer(function(input, output) {
                   axis.text=element_text(size=14),
                   axis.title = element_text(size=20),
                   axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) 
+        show(g)
     })
     
     
