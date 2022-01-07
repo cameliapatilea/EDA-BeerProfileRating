@@ -20,7 +20,7 @@ plot_abv <- function(data = c()){
   
   channelPlot$chart(zoomType = "xy")
   
-  channelPlot$set(width = 1500, height = 600)
+  channelPlot$set(width = 1000, height = 600)
   
   channelPlot$tooltip(shared = TRUE)
   

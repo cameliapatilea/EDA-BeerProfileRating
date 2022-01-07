@@ -5,6 +5,7 @@ library(RColorBrewer)
 library(wordcloud2)
 library(tm)
 library(DT)
+require(highcharter)
 
 sidebar <- dashboardSidebar(
     sidebarMenu(

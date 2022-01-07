@@ -51,7 +51,7 @@ shinyServer(function(input, output) {
     
     # Beer Names Wordcloud
     output$wordcloud_beer_names <- renderWordcloud2({
-        wordcloud2(data=get_wordcloud_beer_names(), size = 3, backgroundColor="#ecf0f5")
+        wordcloud2(data=get_wordcloud_beer_names(), size = 3, backgroundColor="#ffffff")
     })
     
     # Top Breweries

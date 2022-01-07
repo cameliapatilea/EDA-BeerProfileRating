@@ -1,6 +1,5 @@
 # EDA-BeerProfileRating
 
-
 Take the public dataset from Kaggle: https://www.kaggle.com/ruthgn/beer-profile-and-ratings-data-set.
 
 Undergo an exploratory data analysis in order to understand better the data and have an overall image of what it could offer.
@@ -11,9 +10,21 @@ Write documentation and explain the whole process.
 
 CLOC - 700 lines of code in 7 files
 
+# **DOCUMENTATION PROCESS**
+
+## **Keep in mind that we need at least 10 pages!!!!!!!**
+Very important : describing finetuning, every model in particular.
+
+Plots and confusion matrix for every method!!
+
+Table for all the methods we used.
+
+Conclusions.
+
+
 # Running code
 
-In order to rune the code from this repo you should firstly create an anaconda environment with a version of Python 3.10:
+In order to run the code from this repo you should firstly create an anaconda environment with a version of Python 3.10:
 
 conda create -n eda_env python=3.10
 
@@ -27,7 +38,7 @@ pip install -r requirements.xt
 
 Then run:
 
-python src/main.py
+python src/train_model.py
 
 # Folder system imports problem
 
