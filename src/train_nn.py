@@ -334,7 +334,6 @@ def train_nn(X_train, y_train, X_test, y_test, model_name, num_classes, class_we
     learning_rate = 1e-3
 
     if num_classes > 1:
-        
         y_train = tf.keras.utils.to_categorical(y_train, 4)
         y_test = tf.keras.utils.to_categorical(y_test, 4)
 
@@ -365,7 +364,7 @@ def train_nn(X_train, y_train, X_test, y_test, model_name, num_classes, class_we
                                  class_weight=class_weight,
                                  callbacks=[early_stopping, lr_schedule])
     else:
-        import pdb 
+        import pdb
         pdb.set_trace()
         history = classifier.fit(X_train,
                                  y_train,
