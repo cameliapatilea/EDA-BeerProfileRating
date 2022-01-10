@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import random
 import typing
-import umap
+#import umap.umap_ as umap
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
@@ -46,7 +46,7 @@ def cluster(data, cluster_option: str = "kmeans", max_num_datapoints: int = 100)
     clusterizer.fit(data)
     labels = clusterizer.labels_
     for n_components in [2, 3]:
-        for dim_red_option in ["PCA", "TSNE", "LDA", "UMAP"]:  # , "encoder"]:
+        for dim_red_option in ["FA", "PCA", "TSNE", "SVD"]: # , "UMAP", "LDA"]:  # , "encoder"]:
             scaler = get_scaler()
             scaled_data = scaler.fit_transform(data)
             dim_reducer = load_dim_reducer(dim_red_option, n_components)
@@ -135,14 +135,14 @@ def train_model(data: np.ndarray,
         if task_type == "classification":
             print("F1: ", f1_score(y_pred, y_test, average='weighted'))
         else:
-            print("MAE:", mean_absolute_error(y_pred, y_test))
+            print(model_type + " MAE:", mean_absolute_error(y_pred, y_test))
 
 
 from scipy import stats
 
 
 def main():
-    df = pd.read_csv("data/beer_profile_and_ratings.csv")
+    df = pd.read_csv("eda_dataset/beer_profile_and_ratings.csv")
     print(df.columns)
     print(df.dtypes)
     data_columns = ['Min IBU', 'Max IBU', 'Astringency', 'Body', 'Alcohol', 'Bitter', 'Sweet', 'Sour', 'Salty',
@@ -170,11 +170,11 @@ def main():
     data = df[taste_cols].to_numpy()
 
     cluster(data)
-    # model_types = ['SVM', 'RF', 'XGB', 'NN']
-    # task_types = ['regression', 'classification']
-    # for model_type in model_types:
-    #     for task_type in task_types:
-    #         train_model(data, targets, model_type=model_type, task_type=task_type)
+    model_types = ['SVM', 'RF', 'XGB', 'NN']
+    task_types = ['regression'] # , 'classification']   
+    for model_type in model_types:
+        for task_type in task_types:
+            train_model(data, targets, model_type=model_type, task_type=task_type)
 
     # TODO-urile de mai jos sunt mai mult idei, nu trebuie sa le facem pe toate, dar sa facem cat mai multe ideal
 

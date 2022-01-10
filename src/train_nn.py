@@ -1,4 +1,4 @@
-# from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 import numpy as np
 import numpy as np
 import random
@@ -318,13 +318,13 @@ def plot_metric(history, metric_name, model_name):
 
 
 def train_nn(X_train, y_train, X_test, y_test, model_name, num_classes, class_weight=None):
-    early_stopping = callbacks.EarlyStopping(
+    early_stopping = EarlyStopping(
         patience=5,  # how many epochs to wait before stopping
         min_delta=0.001,  # minimium amount of change to count as an improvement
         restore_best_weights=True,
     )
 
-    lr_schedule = callbacks.ReduceLROnPlateau(
+    lr_schedule = ReduceLROnPlateau(
         patience=0,
         factor=0.2,
         min_lr=0.001,
@@ -398,13 +398,13 @@ def train_dimensionality_reducer_autoencoder(X_train,
     n_epochs = 100
     batch_size = 64
 
-    early_stopping = callbacks.EarlyStopping(
+    early_stopping = EarlyStopping(
         patience=5,  # how many epochs to wait before stopping
         min_delta=0.001,  # minimium amount of change to count as an improvement
         restore_best_weights=True,
     )
 
-    lr_schedule = callbacks.ReduceLROnPlateau(
+    lr_schedule = ReduceLROnPlateau(
         patience=0,
         factor=0.2,
         min_lr=0.001,

@@ -1,5 +1,10 @@
 from src.train_nn import load_from_checkpoint
-
+# import umap.umap_ as umap
+from matplotlib import pyplot as plt
+from sklearn.decomposition import PCA, TruncatedSVD, FactorAnalysis
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA_dim
+from sklearn.manifold import TSNE
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 def box_cox_transformation(raw_data):
     # TODO test and see if this can be applied for this case
@@ -37,10 +42,10 @@ def load_dim_reducer(dim_red_option, n_components):
         dim_reducer = PCA(n_components=n_components)
     elif dim_red_option == "TSNE":
         dim_reducer = TSNE(n_components=n_components)
-    elif dim_red_option == "LDA":
-        dim_reducer = LDA_dim(n_components=n_components)
-    elif dim_red_option == "UMAP":
-        dim_reducer = umap.UMAP(n_components=n_components)
+    elif dim_red_option == "FA":
+        dim_reducer = FactorAnalysis(n_components=n_components)
+    elif dim_red_option == "SVD":
+        dim_reducer = TruncatedSVD(n_components=n_components)
     elif dim_red_option == "autoencoder":
         dim_reducer = load_from_chekpoint(n_components=n_components)
     else:
