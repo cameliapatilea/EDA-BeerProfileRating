@@ -15,12 +15,14 @@ def feature_selector(X_train, y_train, model, original_features: typing.List[str
     feature_selection_options_list = ["RFE", "VarianceThreshold",
                                       "SelectKBest", "SelectFromModel"]
 
+
     X_train = pd.DataFrame(data=X_train, index=list(range(len(X_train))),
                            columns=["col_" + str(i) for i in range(len(
                                X_train[0]))])
 
-    if option == "RFE":
-        selector = RFE(model, n_features_to_select=1,
+    model = model.fit(X_train, y_train)
+    if option == "RFE": # err
+        selector = RFE(estimator=model, n_features_to_select=1,
                        step=1)
     elif option == "VarianceThreshold":
         selector = VarianceThreshold()
