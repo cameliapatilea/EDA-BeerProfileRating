@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import random
 import typing
-#import umap.umap_ as umap
+# import umap.umap_ as umap
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
@@ -16,7 +16,7 @@ from sklearn.svm import SVR, SVC
 from sklearn_extra.cluster import KMedoids
 from xgboost import XGBRegressor, XGBClassifier
 
-from src.explain_model import *
+# from src.explain_model import *
 from src.feature_selector import *
 from src.finetune_model import *
 from src.preprocess import *
@@ -46,7 +46,7 @@ def cluster(data, cluster_option: str = "kmeans", max_num_datapoints: int = 100)
     clusterizer.fit(data)
     labels = clusterizer.labels_
     for n_components in [2, 3]:
-        for dim_red_option in ["FA", "PCA", "TSNE", "SVD"]: # , "UMAP", "LDA"]:  # , "encoder"]:
+        for dim_red_option in ["FA", "PCA", "TSNE", "SVD"]:  # , "UMAP", "LDA"]:  # , "encoder"]:
             scaler = get_scaler()
             scaled_data = scaler.fit_transform(data)
             dim_reducer = load_dim_reducer(dim_red_option, n_components)
@@ -146,42 +146,69 @@ def main():
     df = pd.read_csv("eda_dataset/beer_profile_and_ratings.csv")
     print(df.columns)
     print(df.dtypes)
-    data_columns = ['Min IBU', 'Max IBU', 'Astringency', 'Body', 'Alcohol', 'Bitter', 'Sweet', 'Sour', 'Salty',
+    data_columns = ["ABV", 'Min IBU', 'Max IBU', 'Astringency', 'Body', 'Alcohol', 'Bitter', 'Sweet', 'Sour', 'Salty',
                     'Fruits', 'Hoppy', 'Spices', 'Malty']
     data = df[data_columns].to_numpy()
 
-    abv_target = "ABV" # regression
-    review_target = "review_overall" # regression
-    # TODO search a feature that is discrete
-    plot_hist = False
-    predicted_target = review_target  # abv_target
+    abv_target = "ABV"  # regression
+    alcohol_target = "Alcohol" # classification
 
-    targets = np.array(df[predicted_target].to_list())  # BREW ALCOHOL CONTENT
-    print(df[predicted_target].describe())
+    option = ["regression", "classification", "cluster"][-1]
 
-    if plot_hist:
-        plt.hist(targets, bins=25)
-        plt.savefig(f"data/images/{predicted_target}_histogram.png")
-        plt.title(f"{predicted_target} histogram")
-        plt.show()
+    task_types = ['regression', 'classification']
+    if option in task_types:
+        task_types = [option]
+        if option == "regression":
+            predicted_target = abv_target
+        elif option == "classification":
+            predicted_target = alcohol_target
+    else:
+        task_types = [option]
 
-    taste_cols = ['Bitter', 'Sweet', 'Sour', 'Salty']
-    mouthfeel_cols = ['Astringency', 'Body', 'Alcohol']
-    flavor_aroma_cols = ['Fruits', 'Hoppy', 'Spices', 'Malty']
+    if task_types[0] == "cluster":
+        taste_cols = ['Bitter', 'Sweet', 'Sour', 'Salty']
+        # mouthfeel_cols = ['Astringency', 'Body', 'Alcohol']
+        flavor_aroma_cols = ['Fruits', 'Hoppy', 'Spices', 'Malty']
+        for types_of_cols in [taste_cols, flavor_aroma_cols]:
+            data = df[types_of_cols].to_numpy()
+            print(types_of_cols, "**" * 68)
+            cluster(data)
+    else:
+        data_columns.remove(predicted_target)
+        plot_hist = False
+        targets = np.array(df[predicted_target].to_list())  # BREW ALCOHOL CONTENT
+        print(df[predicted_target].describe())
 
-    data = df[taste_cols].to_numpy()
+        if plot_hist:
+            plt.hist(targets, bins=25)
+            plt.savefig(f"data/images/{predicted_target}_histogram.png")
+            plt.title(f"{predicted_target} histogram")
+            plt.show()
 
-    # cluster(data)
-    # TODO Luci
-    # feature_selector(data, targets, SVR(), data_columns, len(data_columns))
-    print(finetune_model(SVR(),data,targets,distributions={'C':[0.1, 1, 10]}))
-    exit(0)
-    model_types = ['NN', 'SVM', 'RF', 'XGB']
-    task_types = ['classification', 'regression']   
-    for model_type in model_types:
+        feature_selection_options_list = ["VarianceThreshold", "SelectKBest"]#, "RFE", "SelectFromModel"] # the last 2 have some bug
+
+        regression_models = [SVR(), RandomForestRegressor(), XGBRegressor()]
+        classification_models = [SVC(), RandomForestClassifier(), XGBClassifier()]
+
         for task_type in task_types:
-            train_model(data, targets, model_type=model_type, task_type=task_type)
-    
+            if task_type == "classification":
+                used_models = classification_models
+            elif task_type == "regression":
+                used_models = regression_models
+            else:
+                raise Exception("wrong task type!")
+            for used_model in used_models:
+                for feature_selection_option in feature_selection_options_list:
+                    feature_selector(data, targets, used_model, data_columns, len(data_columns), option=feature_selection_option)
+
+        exit(0)
+        print(finetune_model(SVR(), data, targets, distributions={'C': [0.1, 1, 10]}))
+        exit(0)
+        model_types = ['NN', 'SVM', 'RF', 'XGB']
+        for model_type in model_types:
+            for task_type in task_types:
+                train_model(data, targets, model_type=model_type, task_type=task_type)
+
 
 if __name__ == '__main__':
     main()
