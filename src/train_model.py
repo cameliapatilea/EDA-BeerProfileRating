@@ -38,7 +38,7 @@ def cluster(data, cluster_option: str = "kmeans", max_num_datapoints: int = 100)
     scaler = StandardScaler()
     data = scaler.fit_transform(data)
     if cluster_option == "kmeans":
-        clusterizer = KMeans(n_clusters=5)
+        clusterizer = KMeans(n_clusters=4)
     elif cluster_option == "kmedoids":
         clusterizer = KMedoids()
     else:
@@ -55,7 +55,7 @@ def cluster(data, cluster_option: str = "kmeans", max_num_datapoints: int = 100)
             elif dim_red_option == "encoder":
                 reduced_data = dim_reducer.predict(scaled_data)
             else:
-                raise Exceptiong("wrong dim_red_option given!")
+                raise Exception("wrong dim_red_option given!")
             colors = {0: "b", 1: "r", 2: "g", 3: "c", 4: "m", 5: "y", 6: "k"}
             if n_components == 2:
                 for (x, label) in list(zip(reduced_data, labels)):
@@ -77,11 +77,12 @@ def train_model(data: np.ndarray,
                 task_type: str = "classification",  # typing.Literal['classification', 'regression']
                 model_type: str = "SVM",
                 scaling_option: str = "standard",
-                use_class_weight: bool = True):  # typing.Literal['XGB', 'RF', 'NN', 'SVM']
+                use_class_weight: bool = False):  # typing.Literal['XGB', 'RF', 'NN', 'SVM']
     data_scaler = get_scaler(scaling_option=scaling_option)
     label_scaler = get_scaler(scaling_option=scaling_option)
     if use_class_weight:
         class_weight = get_class_weight(labels)
+        print(class_weight)
     else:
         class_weight = None
     # TODO subject to change in the future
@@ -149,8 +150,9 @@ def main():
                     'Fruits', 'Hoppy', 'Spices', 'Malty']
     data = df[data_columns].to_numpy()
 
-    abv_target = "ABV"
-    review_target = "review_overall"
+    abv_target = "ABV" # regression
+    review_target = "review_overall" # regression
+    # TODO search a feature that is discrete
     plot_hist = False
     predicted_target = review_target  # abv_target
 
@@ -169,23 +171,17 @@ def main():
 
     data = df[taste_cols].to_numpy()
 
-    cluster(data)
-    model_types = ['SVM', 'RF', 'XGB', 'NN']
-    task_types = ['regression'] # , 'classification']   
+    # cluster(data)
+    # TODO Luci
+    # feature_selector(data, targets, SVR(), data_columns, len(data_columns))
+    print(finetune_model(SVR(),data,targets,distributions={'C':[0.1, 1, 10]}))
+    exit(0)
+    model_types = ['NN', 'SVM', 'RF', 'XGB']
+    task_types = ['classification', 'regression']   
     for model_type in model_types:
         for task_type in task_types:
             train_model(data, targets, model_type=model_type, task_type=task_type)
-
-    # TODO-urile de mai jos sunt mai mult idei, nu trebuie sa le facem pe toate, dar sa facem cat mai multe ideal
-
-    # TODO de vazut daca e nevoie de any data preprocessing / data cleaning / data cleansing mai speciala
-    # TODO de facut analiza exploratorie in R
-
-    # TODO de generat date pentru un system de recomandare care sa recomande pe cele 2 paradigme de recommendation ->
-    # (user based si content based), ne putem inspira dintr-un kaggle notebook existent pe kaggle-ul datasetului ->
-    # pe content based putem sa si recomandam berile care au o valori apropiate la feature-uri sau care produc cosine distance bun la embedding-urile ->
-    # obtinute la mijlocul autoencoder-ului
-
+    
 
 if __name__ == '__main__':
     main()

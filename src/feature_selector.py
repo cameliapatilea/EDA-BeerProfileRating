@@ -11,6 +11,7 @@ def add_features_via_polynomial(data, degree):
 
 
 def feature_selector(X_train, y_train, model, original_features: typing.List[str], num_features=10, option="RFE"):
+    num_features = len(original_features)
     feature_selection_options_list = ["RFE", "VarianceThreshold",
                                       "SelectKBest", "SelectFromModel"]
 

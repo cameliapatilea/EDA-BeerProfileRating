@@ -334,8 +334,9 @@ def train_nn(X_train, y_train, X_test, y_test, model_name, num_classes, class_we
     learning_rate = 1e-3
 
     if num_classes > 1:
-        y_train = tf.keras.utils.to_categorical(y_train)
-        y_test = tf.keras.utils.to_categorical(y_test)
+        
+        y_train = tf.keras.utils.to_categorical(y_train, 4)
+        y_test = tf.keras.utils.to_categorical(y_test, 4)
 
     if num_classes > 1:
         activation_fn = "softmax"
@@ -343,7 +344,7 @@ def train_nn(X_train, y_train, X_test, y_test, model_name, num_classes, class_we
         activation_fn = "sigmoid"
 
     classifier = tf.keras.models.Sequential()
-    classifier.add(tf.keras.layers.Dense(256, input_shape=(X_test[0].shape), activation="relu"))
+    classifier.add(tf.keras.layers.Dense(256, input_shape=X_test[0].shape, activation="relu"))
     classifier.add(tf.keras.layers.Dense(num_classes, activation=activation_fn))
 
     adam_opt = tf.keras.optimizers.Adam(lr=learning_rate)
@@ -364,6 +365,8 @@ def train_nn(X_train, y_train, X_test, y_test, model_name, num_classes, class_we
                                  class_weight=class_weight,
                                  callbacks=[early_stopping, lr_schedule])
     else:
+        import pdb 
+        pdb.set_trace()
         history = classifier.fit(X_train,
                                  y_train,
                                  epochs=n_epochs,
