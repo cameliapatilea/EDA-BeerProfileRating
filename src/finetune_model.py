@@ -1,5 +1,4 @@
 import keras_tuner as kt
-
 from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
 
 
@@ -15,9 +14,9 @@ def finetune_model(model, data, targets, finetune_option="sk_grid_search", distr
     """
     RANDOM_SEED = 13
     if finetune_option == "sk_grid_search":
-        finetuner = GridSearchCV(model, distributions)#, random_state=RANDOM_SEED)
+        finetuner = GridSearchCV(model, distributions, verbose = 1)#, random_state=RANDOM_SEED)
     elif finetune_option == "sk_random_search":
-        finetuner = RandomizedSearchCV(model, distributions)#, random_state=RANDOM_SEED)
+        finetuner = RandomizedSearchCV(model, distributions, verbose = 1)#, random_state=RANDOM_SEED)
     else:
         raise Exception("Wrong finetuning option given!")
 

@@ -9,7 +9,7 @@ from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA_dim
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.manifold import TSNE
-from sklearn.metrics import mean_absolute_error, f1_score
+from sklearn.metrics import mean_absolute_error, f1_score, classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.svm import SVR, SVC
@@ -90,7 +90,12 @@ def train_model(data: np.ndarray,
                  (4, 4.9999): 1,
                  (5, 7.4999): 2,
                  (7.5, max(labels)): 3}
-
+    # intervals =     {(0, 2.999): 0,
+    #                 (3, 3.4999): 1,
+    #                 (3.5, 3.7499): 2,
+    #                 (3.75, 3.9999): 3,
+    #                 (4, 5): 4}
+    
     if task_type == "classification":
         labels = np.array([intervals[(l, r)] for label in labels for (l, r) in intervals.keys() if l <= label <= r])
 
@@ -111,7 +116,7 @@ def train_model(data: np.ndarray,
         elif model_type == "RF":
             model = RandomForestClassifier(random_state=RANDOM_SEED, class_weight=class_weight)
         elif model_type == "NN":
-            train_nn(X_train, y_train, X_test, y_test, model_name="nn_classifier", num_classes=len(intervals), class_weight=class_weight)
+            train_nn(X_train, y_train, X_test, y_test, model_name="nn_classifier", num_classes=len(labels), class_weight=class_weight)
         else:
             raise Exception("Wrong model_type was given")
     elif task_type == "regression":
@@ -129,12 +134,14 @@ def train_model(data: np.ndarray,
         raise Exception("Wrong task_type given!")
 
     if model_type != "NN":
+        # feature_selector(data, labels, model_type, data_columns, len(data_columns), option=feature_selection_option)
         model.fit(X_train, y_train)
 
         y_pred = model.predict(X_test)
 
         if task_type == "classification":
-            print("F1: ", f1_score(y_pred, y_test, average='weighted'))
+            print(classification_report(y_test, y_pred))
+            plot_heatmap(y_pred,y_test)
         else:
             print(model_type + " MAE:", mean_absolute_error(y_pred, y_test))
 
@@ -146,68 +153,113 @@ def main():
     df = pd.read_csv("eda_dataset/beer_profile_and_ratings.csv")
     print(df.columns)
     print(df.dtypes)
+    print(df.isna().sum())
     data_columns = ["ABV", 'Min IBU', 'Max IBU', 'Astringency', 'Body', 'Alcohol', 'Bitter', 'Sweet', 'Sour', 'Salty',
-                    'Fruits', 'Hoppy', 'Spices', 'Malty']
+                    'Fruits', 'Hoppy', 'Spices', 'Malty', 'review_overall']
+    
+    abv_target = "ABV"  # regression
+    review_target = "review_overall" #classification
+
+    data_columns.remove(abv_target)
+    # data_columns.remove(review_target)
+
     data = df[data_columns].to_numpy()
 
-    abv_target = "ABV"  # regression
+    
     alcohol_target = "Alcohol" # classification
 
-    option = ["regression", "classification", "cluster"][-1]
-
     task_types = ['regression', 'classification']
-    if option in task_types:
-        task_types = [option]
-        if option == "regression":
-            predicted_target = abv_target
-        elif option == "classification":
-            predicted_target = alcohol_target
-    else:
-        task_types = [option]
+    # if option in task_types:
+    #     task_types = [option]
+    #     if option == "regression":
+    #         predicted_target = abv_target
+    #     elif option == "classification":
+    #         predicted_target = abv_target
+    # else:
+    #     task_types = [option]
 
-    if task_types[0] == "cluster":
+    if "cluster" in task_types:
         taste_cols = ['Bitter', 'Sweet', 'Sour', 'Salty']
         # mouthfeel_cols = ['Astringency', 'Body', 'Alcohol']
         flavor_aroma_cols = ['Fruits', 'Hoppy', 'Spices', 'Malty']
         for types_of_cols in [taste_cols, flavor_aroma_cols]:
             data = df[types_of_cols].to_numpy()
             print(types_of_cols, "**" * 68)
-            cluster(data)
-    else:
-        data_columns.remove(predicted_target)
-        plot_hist = False
-        targets = np.array(df[predicted_target].to_list())  # BREW ALCOHOL CONTENT
-        print(df[predicted_target].describe())
+            # cluster(data)
 
-        if plot_hist:
-            plt.hist(targets, bins=25)
-            plt.savefig(f"data/images/{predicted_target}_histogram.png")
-            plt.title(f"{predicted_target} histogram")
-            plt.show()
+    
 
-        feature_selection_options_list = ["VarianceThreshold", "SelectKBest"]#, "RFE", "SelectFromModel"] # the last 2 have some bug
+    plot_hist = False
+    targets_regression = np.array(df[abv_target].to_list())  # BREW ALCOHOL CONTENT
+    targets_classification = np.array(df[abv_target].to_list())
 
-        regression_models = [SVR(), RandomForestRegressor(), XGBRegressor()]
-        classification_models = [SVC(), RandomForestClassifier(), XGBClassifier()]
+    print(len(targets_regression))
+    print(len(targets_classification))
 
-        for task_type in task_types:
-            if task_type == "classification":
-                used_models = classification_models
-            elif task_type == "regression":
-                used_models = regression_models
-            else:
-                raise Exception("wrong task type!")
-            for used_model in used_models:
-                for feature_selection_option in feature_selection_options_list:
-                    feature_selector(data, targets, used_model, data_columns, len(data_columns), option=feature_selection_option)
+    print(df[abv_target].describe())
 
-        exit(0)
-        print(finetune_model(SVR(), data, targets, distributions={'C': [0.1, 1, 10]}))
-        exit(0)
-        model_types = ['NN', 'SVM', 'RF', 'XGB']
-        for model_type in model_types:
-            for task_type in task_types:
-                train_model(data, targets, model_type=model_type, task_type=task_type)
+    if plot_hist:
+        plt.hist(targets_regression, bins=100)
+        # plt.savefig(f"data/images/{predicted_target}_histogram.png")
+        plt.title(f"{abv_target} histogram")
+        plt.show()
+
+    feature_selection_options_list = ["VarianceThreshold", "SelectKBest"]#, "RFE", "SelectFromModel"] # the last 2 have some bug
+
+    regression_models = [SVR(), RandomForestRegressor(), XGBRegressor()]
+    classification_models = [SVC(), RandomForestClassifier(), XGBClassifier()]
+
+    # intervals =     {(0, 3): 0,
+    #                 (3, 3.4999): 1,
+    #                 (3.5, 3.7499): 2,
+    #                 (3.75, 3.9999): 3,
+    #                 (4, max(targets_regression)): 4}
+    # targets_classification = np.array([intervals[(l, r)] for label in targets_regression for (l, r) in intervals.keys() if l <= label <= r])
+
+
+    # for task_type in task_types:
+    #     if task_type == "classification":
+    #         used_models = classification_models
+    #     elif task_type == "regression":
+    #         used_models = regression_models
+    #     else:
+    #         raise Exception("wrong task type!")
+    #     for used_model in used_models:
+    #         for feature_selection_option in feature_selection_options_list:
+    #             print(task_type, used_model)
+    #             if task_type == "classification":
+    #                 feature_selector(data, labels, used_model, data_columns, len(data_columns), option=feature_selection_option)
+    #             if task_type == "regression":
+    #                 feature_selector(data, targets, used_model, data_columns, len(data_columns), option=feature_selection_option)
+
+    # # exit(0)
+    
+    # if "regression" in task_types:
+    #     distributions = {'gamma': [0.001, 0.1],
+    #                         'C': [0.1, 1, 10]}
+    #     print('SVR:',finetune_model(SVR(), data, targets, distributions=distributions))
+
+    #     distributions = {'max_depth': [10, 100, None],
+    #                     'min_samples_leaf': [1, 2, 4]}
+    #     print('RandomForestRegressor:',finetune_model(RandomForestRegressor(), data, targets, distributions=distributions))
+    
+    # if "classification" in task_types:
+        
+    #     distributions = {"gamma": [0.001, 0.1], 
+    #                         "C": [0.1, 1, 10]}
+    #     print('SVC:',finetune_model(SVC(), data, labels, distributions=distributions))
+
+    #     distributions = {"max_depth": [10, 100, None],
+    #                         "min_samples_leaf": [1, 2, 4]}
+    #     print('RandomForestClassifier:',finetune_model(RandomForestClassifier(), data, labels, distributions=distributions))
+
+    
+    # exit(0)
+    print(len(data), len(targets_regression), len(targets_classification))
+    model_types = ['SVM', 'RF', 'XGB', 'NN']
+    for model_type in model_types:
+        train_model(data, targets_regression, model_type=model_type, task_type='regression')
+        train_model(data, targets_classification, model_type=model_type, task_type='classification')
 
 
 if __name__ == '__main__':

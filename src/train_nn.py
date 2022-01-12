@@ -1,3 +1,4 @@
+from heat_map import plot_heatmap
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 import numpy as np
 import numpy as np
@@ -219,8 +220,8 @@ def get_classif_perf_metrics(y_test, y_pred, model_name="",
             elif logging_metrics_list[i][0] == 'Recall':
                 logging_metrics_list[i][1] = str(recall_score(y_test, y_pred))
             elif logging_metrics_list[i][0] == 'F1':
-                import pdb
-                pdb.set_trace()
+                # import pdb
+                # pdb.set_trace()
                 logging_metrics_list[i][1] = str(f1_score(y_test, y_pred,
                                                           average='weighted'))
             elif logging_metrics_list[i][0] == 'Classification_report':
@@ -281,6 +282,8 @@ def plot_loss_and_acc(history):
 
 
 def plot_multiple_metrics(history, model_name=""):
+    # import pdb
+    # pdb.set_trace()
     keys = list(history.history.keys())
     colors = ['g', 'b', 'r', 'y', 'p']
     for i in range(len(keys)):
@@ -330,31 +333,33 @@ def train_nn(X_train, y_train, X_test, y_test, model_name, num_classes, class_we
         min_lr=0.001,
     )
 
-    n_epochs = 25
+    n_epochs = 100
     learning_rate = 1e-3
 
     if num_classes > 1:
-        y_train = tf.keras.utils.to_categorical(y_train, 4)
-        y_test = tf.keras.utils.to_categorical(y_test, 4)
+        y_train = tf.keras.utils.to_categorical(y_train, num_classes)
+        y_test = tf.keras.utils.to_categorical(y_test, num_classes)
 
     if num_classes > 1:
         activation_fn = "softmax"
     else:
-        activation_fn = "sigmoid"
+        activation_fn = "linear"
 
     classifier = tf.keras.models.Sequential()
-    classifier.add(tf.keras.layers.Dense(256, input_shape=X_test[0].shape, activation="relu"))
+    classifier.add(tf.keras.layers.Dense(256, input_shape=X_test[0].shape, activation="relu"))    
+    classifier.add(tf.keras.layers.Dense(256, activation="relu"))
     classifier.add(tf.keras.layers.Dense(num_classes, activation=activation_fn))
 
     adam_opt = tf.keras.optimizers.Adam(lr=learning_rate)
     if num_classes > 1:
         loss_function = tf.keras.losses.CategoricalCrossentropy()
-        metrics_function = tf.keras.metrics.Accuracy()
+        metrics_function = 'accuracy'
     else:
-        loss_function = tf.keras.losses.MeanAbsoluteError()
-        metrics_function = tf.keras.metrics.MeanAbsoluteError()
+        loss_function = tf.keras.losses.MeanSquaredError()
+        metrics_function = 'mae'
 
-    classifier.compile(optimizer=adam_opt, loss=loss_function, metrics=[metrics_function])
+    classifier.compile(optimizer=adam_opt, loss=loss_function,
+                         metrics=[metrics_function])
 
     if class_weight is not None:
         history = classifier.fit(X_train,
@@ -364,8 +369,6 @@ def train_nn(X_train, y_train, X_test, y_test, model_name, num_classes, class_we
                                  class_weight=class_weight,
                                  callbacks=[early_stopping, lr_schedule])
     else:
-        import pdb
-        pdb.set_trace()
         history = classifier.fit(X_train,
                                  y_train,
                                  epochs=n_epochs,
@@ -379,6 +382,7 @@ def train_nn(X_train, y_train, X_test, y_test, model_name, num_classes, class_we
         y_pred = np.argmax(y_pred, axis=-1)
 
     if num_classes > 1:
+        plot_heatmap(y_pred,y_test)
         logging_metrics_list = get_classif_perf_metrics(y_test,
                                                         y_pred,
                                                         model_name=model_name, num_classes=num_classes)
@@ -451,6 +455,7 @@ def train_dimensionality_reducer_autoencoder(X_train,
     print(logging_metrics_list)
 
     plot_multiple_metrics(history)
+
 
     checkpoint_path = f"checkpoints/autoencoder/{n_dimensions}_components_autoencoder.ckpt"
     encoder.save(checkpoint_path)
