@@ -377,6 +377,8 @@ def train_nn(X_train, y_train, X_test, y_test, model_name, num_classes, class_we
 
     y_pred = classifier.predict(X_test)
 
+    print(classifier.summary())
+
     if num_classes > 1:
         y_test = np.argmax(y_test, axis=-1)
         y_pred = np.argmax(y_pred, axis=-1)
@@ -394,79 +396,6 @@ def train_nn(X_train, y_train, X_test, y_test, model_name, num_classes, class_we
     print(logging_metrics_list)
 
     plot_multiple_metrics(history)
-
-
-def train_dimensionality_reducer_autoencoder(X_train,
-                                             X_test,
-                                             model_name: str = "Dimensionality reduction autoencoder",
-                                             n_dimensions: int = 2,
-                                             return_option: str = "encoder"):
-    n_epochs = 100
-    batch_size = 64
-
-    early_stopping = EarlyStopping(
-        patience=5,  # how many epochs to wait before stopping
-        min_delta=0.001,  # minimium amount of change to count as an improvement
-        restore_best_weights=True,
-    )
-
-    lr_schedule = ReduceLROnPlateau(
-        patience=0,
-        factor=0.2,
-        min_lr=0.001,
-    )
-
-    original_inputs = keras.Input(shape=X_train[0].shape)
-
-    encoded_inputs = layers.Dense(128, activation='relu')(original_inputs)
-    encoded_inputs = layers.Dense(64, activation='relu')(encoded_inputs)
-    encoded_inputs = layers.Dense(n_dimensions, activation='relu')(encoded_inputs)
-
-    decoded_outputs = layers.Dense(n_dimensions, activation='relu')(encoded_inputs)
-    decoded_outputs = layers.Dense(128, activation='relu')(decoded_outputs)
-    decoded_outputs = layers.Dense(X_train[0].shape, activation='sigmoid')(decoded_outputs)
-
-    encoder = keras.Model(original_inputs, encoded_inputs)
-    decoder = keras.Model(encoded_inputs, decoded_outputs)
-
-    loss_function = tf.keras.losses.MeanAbsoluteError()
-    optimizer = tf.keras.optimizers.Adam(lr=learning_rate)
-
-    autoencoder = keras.Model(original_inputs, decoded_outputs)
-    autoencoder.compile(optimizer=optimizer,
-                        loss=loss_function)
-
-    history = autoencoder.fit(X_train,
-                              X_train,
-                              epochs=n_epochs,
-                              batch_size=batch_size,
-                              shuffle=True,
-                              validation_data=(X_test, X_test),
-                              callbacks=[early_stopping, lr_schedule]
-                              )
-
-    X_pred = autoencoder.predict(X_test)
-
-    logging_metrics_list = get_regress_perf_metrics(X_test,
-                                                    X_pred,
-                                                    model_name=model_name,
-                                                    logging_metrics_list=[['MAE', 0.0], ['MSE', 0.0]])
-
-    print(logging_metrics_list)
-
-    plot_multiple_metrics(history)
-
-
-    checkpoint_path = f"checkpoints/autoencoder/{n_dimensions}_components_autoencoder.ckpt"
-    encoder.save(checkpoint_path)
-
-    if return_option == "encoder":
-        return encoder
-    elif return_option == "latents":
-        return encoder.predict(X_train), encoder.predict(X_test)
-    else:
-        raise Exception("wrong return_option given!")
-
 
 def load_from_checkpoint(n_components: int = 2):
     checkpoint_path = f"checkpoints/autoencoder/{n_components}_components_autoencoder.ckpt"

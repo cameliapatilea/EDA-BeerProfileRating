@@ -21,8 +21,8 @@ def finetune_model(model, data, targets, finetune_option="sk_grid_search", distr
         raise Exception("Wrong finetuning option given!")
 
     if finetune_option.startswith("sk"):
-        search = finetuner.fit(data, targets)
-        return search.best_params_
+        finetuner.fit(data, targets)
+        return finetuner
     elif finetune_option.startswith("keras"):
         finetuner.search(data, targets, epochs=5)
         return finetuner.get_best_models()[0]
