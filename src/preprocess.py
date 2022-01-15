@@ -7,7 +7,7 @@ from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 def box_cox_transformation(raw_data):
-    # TODO test and see if this can be applied for this case
+  
     fitted_data, fitted_lambda = stats.boxcox(raw_data)
 
     fig, ax = plt.subplots(1, 2)
@@ -28,7 +28,7 @@ def box_cox_transformation(raw_data):
 
 
 def get_scaler(scaling_option="standard"):
-    # TODO finetune this as a hyperparam
+  
     if scaling_option == "standard":
         return StandardScaler()
     elif scaling_option == "minmax":

@@ -3,8 +3,7 @@ from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
 
 
 def finetune_model(model, data, targets, finetune_option="sk_grid_search", distributions: dict = dict()):
-    # TODO finetune the option from the 3 availables ones
-    """
+   """
     :param model:
     :param data:
     :param targets:

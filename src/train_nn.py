@@ -5,18 +5,7 @@ import numpy as np
 import random
 import tensorflow as tf
 from sklearn.metrics import confusion_matrix, accuracy_score, classification_report
-# from tensorflow import keras
-# from tensorflow.keras.layers import Dense, Dropout, Flatten, LSTM, Conv1D, \
-#     MaxPool1D, Embedding
-# from tensorflow.keras.models import Sequential
-# from keras.preprocessing.text import Tokenizer
-# from keras.preprocessing.sequence import pad_sequences
-# from tensorflow.keras import regularizers
-# from keras.utils import to_categorical
-# # from tensorflow.keras.python.keras.layers import Dense, Embedding, LSTM
-# # from tensorflow.keras.python.keras import Sequential
-# from tensorflow.keras.optimizers import Adam, SGD
-# from tensorflow.keras import layers
+
 from sklearn.metrics import f1_score, precision_score, recall_score, \
     mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split
@@ -45,7 +34,6 @@ import numpy as np
 from sklearn.metrics import matthews_corrcoef
 
 
-# from scipy.stats import median_absolute_deviation
 
 
 def mean_absolute_percentage_error(y_true, y_pred):
@@ -412,9 +400,6 @@ def load_from_checkpoint(n_components: int = 2):
     encoder.load_weights(checkpoint_path)
     return encoder
 
-
-# def split_and_train(training_docs, labels, model_name, num_classes):
-#     train_nn(X_train, y_train, X_test, y_test, model_name, num_classes)
 
 
 if __name__ == '__main__':
