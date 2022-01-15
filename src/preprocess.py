@@ -6,26 +6,6 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA_dim
 from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
-def box_cox_transformation(raw_data):
-  
-    fitted_data, fitted_lambda = stats.boxcox(raw_data)
-
-    fig, ax = plt.subplots(1, 2)
-
-    sns.distplot(raw_data, hist=False, kde=True,
-                 kde_kws={'shade': True, 'linewidth': 2},
-                 label="Non-Normal", color="green", ax=ax[0])
-
-    sns.distplot(fitted_data, hist=False, kde=True,
-                 kde_kws={'shade': True, 'linewidth': 2},
-                 label="Normal", color="green", ax=ax[1])
-
-    plt.legend(loc="best")
-    fig.set_figheight(5)
-    fig.set_figwidth(10)
-
-    print(f"Lambda value used for Transformation: {fitted_lambda}")
-
 
 def get_scaler(scaling_option="standard"):
   
