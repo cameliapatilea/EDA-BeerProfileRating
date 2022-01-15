@@ -26,52 +26,6 @@ from src.train_nn import *
 RANDOM_SEED = 13
 
 
-def cluster(data, cluster_option: str = "kmeans", max_num_datapoints: int = 100):
-    """
-    :param data: the list of datapoints
-    :param cluster_option: suggests which clusterizing algorithm to try
-    :param max_num_datapoints: specifies how many datapoints to use from the list data (should not be very large as it might crash matplotlib plotting capabilities
-    """
-    random.shuffle(data)
-    if max_num_datapoints is not None:
-        data = data[:max_num_datapoints]
-    scaler = StandardScaler()
-    data = scaler.fit_transform(data)
-    if cluster_option == "kmeans":
-        clusterizer = KMeans(n_clusters=4)
-    elif cluster_option == "kmedoids":
-        clusterizer = KMedoids()
-    else:
-        raise Exception("Wrong cluster_option given!")
-    clusterizer.fit(data)
-    labels = clusterizer.labels_
-    for n_components in [2, 3]:
-        for dim_red_option in ["FA", "PCA", "TSNE", "SVD"]:  # , "UMAP", "LDA"]:  # , "encoder"]:
-            scaler = get_scaler()
-            scaled_data = scaler.fit_transform(data)
-            dim_reducer = load_dim_reducer(dim_red_option, n_components)
-            if dim_red_option != "encoder":
-                reduced_data = dim_reducer.fit_transform(scaled_data)
-            elif dim_red_option == "encoder":
-                reduced_data = dim_reducer.predict(scaled_data)
-            else:
-                raise Exception("wrong dim_red_option given!")
-            colors = {0: "b", 1: "r", 2: "g", 3: "c", 4: "m", 5: "y", 6: "k"}
-            if n_components == 2:
-                for (x, label) in list(zip(reduced_data, labels)):
-                    plt.scatter(x[0], x[1], color=colors[label])
-                plt.gca().set_aspect('equal', 'datalim')
-            elif n_components == 3:
-                fig = plt.figure()
-                ax = fig.add_subplot(projection='3d')
-                for (x, label) in list(zip(reduced_data, labels)):
-                    ax.scatter(x[0], x[1], x[2], color=colors[label])
-            else:
-                raise Exception(f"n_components has to be 2 or 3 while {n_components} was given!")
-            plt.title(f'{dim_red_option} learned embeddings projection of the protein agg. dataset in {n_components}D', fontsize=24)
-            plt.show()
-
-
 def train_model(data: np.ndarray,
                 labels: typing.List[float],
                 task_type: str = "classification",  # typing.Literal['classification', 'regression']
@@ -189,17 +143,7 @@ def main():
 
     task_types = ['regression', 'classification']
 
-    if "cluster" in task_types:
-        taste_cols = ['Bitter', 'Sweet', 'Sour', 'Salty']
-        # mouthfeel_cols = ['Astringency', 'Body', 'Alcohol']
-        flavor_aroma_cols = ['Fruits', 'Hoppy', 'Spices', 'Malty']
-        for types_of_cols in [taste_cols, flavor_aroma_cols]:
-            data = df[types_of_cols].to_numpy()
-            print(types_of_cols, "**" * 68)
-            cluster(data)
-
-    
-
+   
     plot_hist = True
     targets_regression = np.array(df[abv_target].to_list())  # BREW ALCOHOL CONTENT
     targets_classification = np.array(df[abv_target].to_list())
